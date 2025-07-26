@@ -34,3 +34,5 @@ Try it live: [http://neurodraw.netlify.app/](http://neurodraw.netlify.app/)
 - **Canvas API** for real-time drawing
 - **Tailwind CSS** for styling
 - **Vite** for fast development
+
+Used AI for idea and feature suggestion and with canvas and painting. I am not sooo familiar with this stack, so had to take help.
