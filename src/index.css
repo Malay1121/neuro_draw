@@ -1,0 +1,278 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #0D0D0D;
+  overflow: hidden;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Custom slider styles */
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #00E0FF, #FF2CFB);
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 10px rgba(0, 224, 255, 0.5);
+  transition: all 0.2s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(0, 224, 255, 0.8);
+}
+
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #00E0FF, #FF2CFB);
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 10px rgba(0, 224, 255, 0.5);
+  transition: all 0.2s ease;
+}
+
+.slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(0, 224, 255, 0.8);
+}
+
+/* Disable text selection on canvas */
+canvas {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Custom scrollbar for control panel */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 224, 255, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 224, 255, 0.5);
+}
+
+/* Glassmorphism effects */
+.glass-panel {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Neural glow effect */
+.neural-glow {
+  filter: drop-shadow(0 0 10px rgba(0, 224, 255, 0.5));
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .slider::-webkit-slider-thumb {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Animation for neural connections */
+@keyframes neural-flow {
+  0% { 
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+  100% { 
+    opacity: 0.3;
+    transform: scale(1);
+  }
+}
+
+@keyframes electric-pulse {
+  0% { 
+    opacity: 0.4;
+    filter: brightness(1) hue-rotate(0deg);
+  }
+  25% { 
+    opacity: 0.9;
+    filter: brightness(1.3) hue-rotate(10deg);
+  }
+  50% { 
+    opacity: 0.7;
+    filter: brightness(1.1) hue-rotate(-5deg);
+  }
+  75% { 
+    opacity: 0.9;
+    filter: brightness(1.2) hue-rotate(15deg);
+  }
+  100% { 
+    opacity: 0.4;
+    filter: brightness(1) hue-rotate(0deg);
+  }
+}
+
+@keyframes organic-grow {
+  0% { 
+    opacity: 0.2;
+    transform: scale(0.98);
+    filter: hue-rotate(0deg) saturate(1);
+  }
+  33% { 
+    opacity: 0.6;
+    transform: scale(1.01);
+    filter: hue-rotate(5deg) saturate(1.2);
+  }
+  66% { 
+    opacity: 0.8;
+    transform: scale(1.02);
+    filter: hue-rotate(-3deg) saturate(1.1);
+  }
+  100% { 
+    opacity: 0.2;
+    transform: scale(0.98);
+    filter: hue-rotate(0deg) saturate(1);
+  }
+}
+
+@keyframes particle-float {
+  0% { 
+    transform: translateY(0px) scale(1);
+    opacity: 0.8;
+  }
+  50% { 
+    transform: translateY(-10px) scale(1.1);
+    opacity: 1;
+  }
+  100% { 
+    transform: translateY(0px) scale(1);
+    opacity: 0.8;
+  }
+}
+
+.neural-connection {
+  animation: neural-flow 3s ease-in-out infinite;
+}
+
+.electric-mode {
+  animation: electric-pulse 2s ease-in-out infinite;
+}
+
+.organic-mode {
+  animation: organic-grow 4s ease-in-out infinite;
+}
+
+.particle-effect {
+  animation: particle-float 2s ease-in-out infinite;
+}
+
+/* Color transition effects */
+.color-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Glow variants */
+.glow-low {
+  filter: drop-shadow(0 0 5px currentColor);
+}
+
+.glow-medium {
+  filter: drop-shadow(0 0 15px currentColor);
+}
+
+.glow-high {
+  filter: drop-shadow(0 0 25px currentColor);
+}
+
+/* Enhanced button effects */
+.mode-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.mode-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.mode-button:hover::before {
+  left: 100%;
+}
+
+/* Color picker enhancements */
+.color-option {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.color-option::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent, currentColor, transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.color-option:hover::after {
+  opacity: 0.3;
+}
+
+.color-option.selected::after {
+  opacity: 0.6;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
