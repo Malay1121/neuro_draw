@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { RotateCcw, Download, Palette, Zap, TreePine, Sparkles, Circle } from 'lucide-react';
+import { RotateCcw, Download, Palette, Zap, TreePine, Sparkles, Circle, Eye, Wand2, Shapes, MousePointer } from 'lucide-react';
 import { exportCanvasAsPNG } from '../utils/exportImage';
 import type { GrowthSettings } from '../App';
 
@@ -234,7 +234,74 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             onChange={(value) => onSettingsChange({ particleEffects: value })}
             icon={Sparkles}
           />
+
+          <ToggleSwitch
+            label="Gesture Recognition"
+            value={settings.gestureRecognition}
+            onChange={(value) => onSettingsChange({ gestureRecognition: value })}
+            icon={MousePointer}
+          />
+
+          <ToggleSwitch
+            label="Shape Detection"
+            value={settings.shapeDetection}
+            onChange={(value) => onSettingsChange({ shapeDetection: value })}
+            icon={Shapes}
+          />
+
+          <ToggleSwitch
+            label="Special Effects"
+            value={settings.specialEffects}
+            onChange={(value) => onSettingsChange({ specialEffects: value })}
+            icon={Wand2}
+          />
+
+          <ToggleSwitch
+            label="Physics Simulation"
+            value={settings.physicsEnabled}
+            onChange={(value) => onSettingsChange({ physicsEnabled: value })}
+            icon={Zap}
+          />
         </div>
+
+        {/* Physics Controls */}
+        {settings.physicsEnabled && (
+          <div className="space-y-3 border-t border-white/10 pt-4">
+            <h3 className="text-sm font-medium text-gray-300 mb-3">Physics Settings</h3>
+            
+            <SliderControl
+              label="Gravity"
+              value={settings.gravity}
+              onChange={(value) => onSettingsChange({ gravity: value })}
+              min={0}
+              max={2}
+              icon={TreePine}
+            />
+
+            <SliderControl
+              label="Wind Strength"
+              value={settings.windStrength}
+              onChange={(value) => onSettingsChange({ windStrength: value })}
+              min={0}
+              max={5}
+              icon={Sparkles}
+            />
+
+            <ToggleSwitch
+              label="Collision Detection"
+              value={settings.collisionDetection}
+              onChange={(value) => onSettingsChange({ collisionDetection: value })}
+              icon={Circle}
+            />
+
+            <ToggleSwitch
+              label="Spring Dynamics"
+              value={settings.springDynamics}
+              onChange={(value) => onSettingsChange({ springDynamics: value })}
+              icon={Eye}
+            />
+          </div>
+        )}
 
         <div className={`space-y-3 ${isMobile ? 'flex space-y-0 space-x-3' : ''}`}>
           <motion.button

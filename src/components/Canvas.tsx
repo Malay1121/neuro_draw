@@ -1,6 +1,9 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { generateBranches, animateBranches } from '../utils/growthAlgorithm';
+import { gestureRecognizer, GestureResult } from '../utils/gestureRecognition';
+import { specialEffectsManager } from '../utils/specialEffects';
+import { physicsSimulation } from '../utils/physicsSimulation';
 import type { GrowthSettings } from '../App';
 
 interface Point {
@@ -51,6 +54,8 @@ const Canvas: React.FC<CanvasProps> = ({ settings, regenerateKey }) => {
   const [branches, setBranches] = useState<Branch[]>([]);
   const [particles, setParticles] = useState<Particle[]>([]);
   const [currentStroke, setCurrentStroke] = useState<Point[]>([]);
+  const [detectedGesture, setDetectedGesture] = useState<GestureResult | null>(null);
+  const [showGestureIndicator, setShowGestureIndicator] = useState(false);
   const animationRef = useRef<number>();
 
   const getCanvasPoint = useCallback((e: MouseEvent | TouchEvent): Point => {
@@ -135,10 +140,45 @@ const Canvas: React.FC<CanvasProps> = ({ settings, regenerateKey }) => {
       timestamp: Date.now()
     };
     setStrokes(prev => [...prev, newStroke]);
-    setCurrentStroke([]);
 
+    // Gesture Recognition
+    if (settings.gestureRecognition && currentStroke.length >= 5) {
+      const gesture = gestureRecognizer.recognizeGesture(currentStroke);
+      
+      if (gesture.confidence > 0.6) {
+        setDetectedGesture(gesture);
+        setShowGestureIndicator(true);
+        
+        // Trigger special effects for recognized shapes
+        if (settings.specialEffects && gesture.center) {
+          specialEffectsManager.triggerShapeEffect(
+            gesture.type, 
+            gesture.center, 
+            settings.selectedColor
+          );
+        }
+
+        // Auto-hide gesture indicator after 2 seconds
+        setTimeout(() => {
+          setShowGestureIndicator(false);
+        }, 2000);
+      }
+    }
+
+    setCurrentStroke([]);
     const newBranches = generateBranches(currentStroke, settings);
     setBranches(prev => [...prev, ...newBranches]);
+    
+    // Add branches to physics simulation if physics is enabled
+    if (settings.physicsEnabled && newBranches.length > 0) {
+      for (const branch of newBranches) {
+        const branchPoints = [
+          { x: branch.startX, y: branch.startY },
+          { x: branch.endX, y: branch.endY }
+        ];
+        physicsSimulation.createBranchFromPoints(branchPoints, 0.5);
+      }
+    }
   }, [isDrawing, currentStroke, settings]);
 
   useEffect(() => {
@@ -150,6 +190,12 @@ const Canvas: React.FC<CanvasProps> = ({ settings, regenerateKey }) => {
       if (currentTime - lastUpdate >= frameInterval) {
         setBranches(prev => animateBranches(prev, settings.growthSpeed, settings, generateParticles));
         updateParticles();
+        
+        // Update special effects
+        if (settings.specialEffects) {
+          specialEffectsManager.updateEffects();
+        }
+        
         lastUpdate = currentTime;
       }
       animationRef.current = requestAnimationFrame(animate);
@@ -162,7 +208,7 @@ const Canvas: React.FC<CanvasProps> = ({ settings, regenerateKey }) => {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [settings.growthSpeed, generateParticles, updateParticles]);
+  }, [settings.growthSpeed, settings.specialEffects, generateParticles, updateParticles]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -294,7 +340,65 @@ const Canvas: React.FC<CanvasProps> = ({ settings, regenerateKey }) => {
         ctx.globalAlpha = 1;
       });
     }
-  }, [strokes, currentStroke, branches, particles, settings.brushSize, settings.selectedColor, settings.glowIntensity, settings.drawingMode, settings.particleEffects]);
+
+    // Render special effects
+    if (settings.specialEffects) {
+      specialEffectsManager.renderEffects(ctx, devicePixelRatio);
+    }
+
+    // Update and render physics simulation
+    if (settings.physicsEnabled) {
+      physicsSimulation.setCanvasSize(canvas.width, canvas.height);
+      physicsSimulation.setGravity(settings.gravity);
+      physicsSimulation.setWind(settings.windStrength * Math.cos(Date.now() * 0.001), 0);
+      physicsSimulation.update();
+
+      // Render physics points and springs
+      const points = physicsSimulation.getPoints();
+      const springs = physicsSimulation.getSprings();
+
+      ctx.save();
+      
+      // Draw springs
+      if (settings.collisionDetection) {
+        ctx.strokeStyle = settings.selectedColor;
+        ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.6;
+        
+        springs.forEach(spring => {
+          const p1 = points[spring.point1];
+          const p2 = points[spring.point2];
+          
+          ctx.beginPath();
+          ctx.moveTo(p1.x / devicePixelRatio, p1.y / devicePixelRatio);
+          ctx.lineTo(p2.x / devicePixelRatio, p2.y / devicePixelRatio);
+          ctx.stroke();
+        });
+      }
+
+      // Draw physics points
+      if (settings.springDynamics) {
+        ctx.fillStyle = settings.selectedColor;
+        ctx.globalAlpha = 0.8;
+        
+        points.forEach(point => {
+          if (!point.fixed) {
+            ctx.beginPath();
+            ctx.arc(
+              point.x / devicePixelRatio, 
+              point.y / devicePixelRatio, 
+              2, 
+              0, 
+              Math.PI * 2
+            );
+            ctx.fill();
+          }
+        });
+      }
+      
+      ctx.restore();
+    }
+  }, [strokes, currentStroke, branches, particles, settings.brushSize, settings.selectedColor, settings.glowIntensity, settings.drawingMode, settings.particleEffects, settings.specialEffects, settings.physicsEnabled, settings.gravity, settings.windStrength, settings.collisionDetection, settings.springDynamics]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -351,6 +455,10 @@ const Canvas: React.FC<CanvasProps> = ({ settings, regenerateKey }) => {
     setBranches([]);
     setParticles([]);
     setCurrentStroke([]);
+    setDetectedGesture(null);
+    setShowGestureIndicator(false);
+    specialEffectsManager.clearEffects();
+    physicsSimulation.clear();
   }, [regenerateKey]);
 
   return (
@@ -369,6 +477,47 @@ const Canvas: React.FC<CanvasProps> = ({ settings, regenerateKey }) => {
           background: 'radial-gradient(ellipse at center, #0D0D0D 0%, #000000 100%)'
         }}
       />
+
+      {/* Gesture Recognition Indicator */}
+      {showGestureIndicator && detectedGesture && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8, y: -20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.8, y: -20 }}
+          className="absolute top-4 left-4 bg-gradient-to-r from-cyan-500/20 to-purple-500/20 backdrop-blur-sm border border-cyan-500/30 rounded-lg px-4 py-2 flex items-center space-x-3 z-10"
+        >
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+            <span className="text-cyan-400 text-sm font-medium">
+              {detectedGesture.type.charAt(0).toUpperCase() + detectedGesture.type.slice(1)} Detected
+            </span>
+          </div>
+          <div className="text-xs text-white/60">
+            {Math.round(detectedGesture.confidence * 100)}%
+          </div>
+        </motion.div>
+      )}
+
+      {/* Feature Status Indicators */}
+      {(settings.gestureRecognition || settings.specialEffects || settings.physicsEnabled) && (
+        <div className="absolute top-4 right-4 flex flex-col space-y-2 z-10">
+          {settings.gestureRecognition && (
+            <div className="bg-green-500/20 border border-green-500/30 rounded px-2 py-1 text-xs text-green-400 backdrop-blur-sm">
+              Gesture Recognition
+            </div>
+          )}
+          {settings.specialEffects && (
+            <div className="bg-purple-500/20 border border-purple-500/30 rounded px-2 py-1 text-xs text-purple-400 backdrop-blur-sm">
+              Special Effects
+            </div>
+          )}
+          {settings.physicsEnabled && (
+            <div className="bg-orange-500/20 border border-orange-500/30 rounded px-2 py-1 text-xs text-orange-400 backdrop-blur-sm">
+              Physics Simulation
+            </div>
+          )}
+        </div>
+      )}
       
       {strokes.length === 0 && branches.length === 0 && (
         <motion.div

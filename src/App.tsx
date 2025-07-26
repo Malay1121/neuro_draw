@@ -12,6 +12,14 @@ export interface GrowthSettings {
   drawingMode: 'neural' | 'electric' | 'organic';
   glowIntensity: number;
   particleEffects: boolean;
+  gestureRecognition: boolean;
+  shapeDetection: boolean;
+  specialEffects: boolean;
+  physicsEnabled: boolean;
+  gravity: number;
+  windStrength: number;
+  collisionDetection: boolean;
+  springDynamics: boolean;
 }
 
 function App() {
@@ -22,7 +30,15 @@ function App() {
     selectedColor: '#00E0FF',
     drawingMode: 'neural',
     glowIntensity: 15,
-    particleEffects: true
+    particleEffects: true,
+    gestureRecognition: true,
+    shapeDetection: true,
+    specialEffects: true,
+    physicsEnabled: false,
+    gravity: 0.1,
+    windStrength: 0.05,
+    collisionDetection: false,
+    springDynamics: false
   });
 
   const [regenerateKey, setRegenerateKey] = useState(0);
